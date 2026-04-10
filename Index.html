@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>For You</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Pretendard", "Noto Sans KR", Arial, sans-serif;
+      background: linear-gradient(180deg, #fff7fb 0%, #fff 40%, #fff7fb 100%);
+      color: #222;
+      overflow-x: hidden;
+    }
+
+    .floating-hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .heart {
+      position: absolute;
+      bottom: -40px;
+      font-size: 18px;
+      opacity: 0.18;
+      animation: floatUp linear infinite;
+    }
+
+    @keyframes floatUp {
+      from {
+        transform: translateY(0) scale(0.8);
+        opacity: 0;
+      }
+      15% {
+        opacity: 0.18;
+      }
+      to {
+        transform: translateY(-120vh) scale(1.3);
+        opacity: 0;
+      }
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-card {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 28px;
+      padding: 38px 26px;
+      max-width: 720px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(255, 126, 169, 0.16);
+      animation: fadeUp 1s ease;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: #ffe4ef;
+      color: #d94f86;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: clamp(32px, 6vw, 58px);
+      margin: 0 0 16px;
+      line-height: 1.15;
+    }
+
+    .hero p {
+      font-size: clamp(16px, 2.6vw, 21px);
+      line-height: 1.8;
+      margin: 0 auto 26px;
+      max-width: 560px;
+      color: #444;
+    }
+
+    .scroll-btn {
+      display: inline-block;
+      padding: 14px 22px;
+      border-radius: 999px;
+      text-decoration: none;
+      background: linear-gradient(135deg, #ff7aa8, #ff5f8f);
+      color: white;
+      font-weight: 700;
+      box-shadow: 0 12px 30px rgba(255, 95, 143, 0.28);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .scroll-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 34px rgba(255, 95, 143, 0.34);
+    }
+
+    .section {
+      position: relative;
+      z-index: 1;
+      padding: 90px 20px;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: clamp(26px, 4vw, 40px);
+      margin: 0 0 18px;
+    }
+
+    .timeline {
+      max-width: 860px;
+      margin: 0 auto;
+      position: relative;
+      padding: 8px 0;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, #ffd7e5, #ff7aa8, #ffd7e5);
+      border-radius: 999px;
+    }
+
+    .timeline-item {
+      width: 50%;
+      padding: 20px 28px;
+      position: relative;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .timeline-item.left {
+      left: 0;
+      text-align: center;
+    }
+
+    .timeline-item.right {
+      left: 50%;
+      text-align: center;
+    }
+
+    .timeline-dot {
+      width: 18px;
+      height: 18px;
+      background: #ff6f9e;
+      border: 4px solid white;
+      border-radius: 50%;
+      position: absolute;
+      top: 34px;
+      box-shadow: 0 0 0 6px rgba(255, 111, 158, 0.14);
+    }
+
+    .left .timeline-dot {
+      right: -9px;
+    }
+
+    .right .timeline-dot {
+      left: -9px;
+    }
+
+    .timeline-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.07);
+    }
+
+    .timeline-date {
+      font-size: 14px;
+      color: #d94f86;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .timeline-card h3 {
+      margin: 0 0 10px;
+      font-size: 22px;
+    }
+
+    .timeline-card p {
+      margin: 0;
+      color: #555;
+      line-height: 1.75;
+      text-align: center;
+    }
+
+    .photo-box {
+      margin-top: 14px;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #fff0f5;
+      border: 1px dashed #ffb7cf;
+      min-height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #c46b8b;
+      font-weight: 700;
+      text-align: center;
+      padding: 16px;
+    }
+
+    .photo-box img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      display: block;
+      border-radius: 18px;
+    }
+
+    .message-wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.92);
+      border-radius: 28px;
+      padding: 36px 24px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.07);
+      text-align: center;
+    }
+
+    .typewriter {
+      font-size: clamp(20px, 3vw, 32px);
+      line-height: 1.65;
+      min-height: 140px;
+      white-space: pre-wrap;
+      color: #333;
+    }
+
+    .final {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .final-card {
+      max-width: 760px;
+      width: 100%;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,245,249,0.96));
+      border-radius: 32px;
+      padding: 42px 24px;
+      box-shadow: 0 22px 60px rgba(255, 114, 160, 0.18);
+      border: 1px solid rgba(255, 201, 221, 0.7);
+    }
+
+    .final-card h2 {
+      font-size: clamp(28px, 5vw, 46px);
+      margin: 0 0 14px;
+    }
+
+    .final-card p {
+      font-size: 18px;
+      line-height: 1.8;
+      color: #4c4c4c;
+      margin: 0 auto 26px;
+      max-width: 560px;
+    }
+
+    .footer-note {
+      text-align: center;
+      padding: 30px 20px 50px;
+      color: #888;
+      font-size: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        overflow-x: hidden;
+      }
+
+      .hero {
+        padding: 18px;
+      }
+
+      .hero-card {
+        padding: 28px 18px;
+        border-radius: 24px;
+      }
+
+      h1 {
+        font-size: clamp(24px, 10vw, 42px);
+        line-height: 1.18;
+      }
+
+      .hero p {
+        font-size: 18px;
+        line-height: 1.75;
+      }
+
+      .section {
+        padding: 68px 16px;
+      }
+
+      .section-title {
+        font-size: clamp(24px, 9vw, 34px);
+      }
+
+      .timeline::before {
+        left: 20px;
+      }
+
+      .timeline-item,
+      .timeline-item.left,
+      .timeline-item.right {
+        width: 100%;
+        left: 0;
+        text-align: center;
+        padding-left: 54px;
+        padding-right: 0;
+      }
+
+      .left .timeline-dot,
+      .right .timeline-dot {
+        left: 11px;
+        right: auto;
+      }
+
+      .timeline-card {
+        padding: 18px;
+        border-radius: 20px;
+      }
+
+      .timeline-card h3 {
+        font-size: 24px;
+      }
+
+      .timeline-card p {
+        font-size: 18px;
+        line-height: 1.8;
+      }
+
+      .photo-box {
+        min-height: 160px;
+        font-size: 16px;
+      }
+
+      .message-wrap,
+      .final-card {
+        padding: 28px 18px;
+        border-radius: 24px;
+      }
+
+      .final-card p,
+      .typewriter {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <audio id="bgm" autoplay loop>
+    <source src="검정치마-Everything.mp3" type="audio/mpeg" />
+  </audio>
+
+  <div class="floating-hearts" id="hearts"></div>
+
+  <section class="hero">
+    <div class="hero-card">
+      <div class="badge">A small page made just for you</div>
+      <h1>There was something<br />I wanted to tell you</h1>
+      <p>
+        그냥 말로만 하기엔 아쉬워서,
+        <br />
+        내가 제일 잘하는 방식으로 조금 특별하게 준비해봤어.
+      </p>
+      <a class="scroll-btn" href="#timeline">천천히 보기</a>
+    </div>
+  </section>
+
+  <section class="section" id="timeline">
+    <h2 class="section-title">Little timeline</h2>
+
+    <div class="timeline">
+      <div class="timeline-item left">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-date">STEP 01 · 첫 인상</div>
+          <h3>우리가 처음 만났을 때</h3>
+          <p>
+            그거 알아?<br />
+            이 사람이구나 느낌이 오는 시간이 3초래.<br />
+            우리가 처음 반포 한강공원에서 만난 날 이후로<br />
+            누나가 더 생각나고 보고 싶어졌어.<br />
+            다음 만남이 기대와 설렘으로 가득해져서<br />
+            하루를 더 열심히 보람차게 보내게 되었고,<br />
+            누나 덕분에 내 하루가 더 밝게 빛나게 되었어.
+          </p>
+          <div class="photo-box">
+            <img src="Image 1.jpg" alt="our first memory" />
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item right">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-date">STEP 02 · 만남</div>
+          <h3>함께 보낸 특별했던 시간들</h3>
+          <p>
+            함께 있으면 행복하고,<br />
+            대화하면 시간 가는줄 모르고,<br />
+            떨어져 있으면 정말 많이 보고 싶더라고..<br />
+            이처럼 그리웠던 시간들이 있었기에<br />
+            누나를 향한 내 마음을 더 명확하게<br />
+            확인 할 수 있게 되었어
+          </p>
+          <div class="photo-box">
+            <img src="Image 2.jpg" alt="our special time" />
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item left">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-date">STEP 03 · 용기</div>
+          <h3>진심을 전하기까지</h3>
+          <p>
+            누군가에게 자신의 마음을 전하는 일이<br />
+            얼마나 큰 용기가 필요한지 느끼게 되었어.<br />
+            덕분에 요즘 기도를 더 많이 하게 되었고<br />
+            내 진심 어린 마음을 솔직하게 전달하는게<br />
+            상대방에 대한 배려라고 생각해서<br />
+            이렇게 용기 내어 고백하게 되었어.
+          </p>
+          <div class="photo-box">
+            <img src="Image 3.jpg" alt="courage to confess" />
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item right">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-date">STEP 04 · 미래</div>
+          <h3>인연의 다른 말은 선물</h3>
+          <p>
+            힘들 때 기댈 수 있는 남자친구이자<br />
+            긍정적인 영향을 주는 동반자가 되고 싶어<br />
+            앞으로도 함께 소중한 시간을 보내며<br />
+            예쁜 추억과 기억들을 많이 만들어나가고 싶어<br />
+            그리고 누나의 꿈을 정말 진심으로 응원해!<br />
+            앞으로 내 미래를<br />
+            누나랑 함께 행복하게 그려나가고 싶어 ☺️
+          </p>
+          <div class="photo-box">
+            <img src="Image 4.jpg" alt="future together" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="message-wrap">
+      <h2 class="section-title">정말 많이 좋아하고 또 진심으로 사랑해 ❤️</h2>
+      <div id="typewriter" class="typewriter"></div>
+    </div>
+  </section>
+
+  <section class="final" id="final">
+    <div class="final-card">
+      <h2>이제는 누나 남자친구이자<br />소중한 인연이 되고 싶어.</h2>
+      <p>
+        괜찮다면 내가 누나의 미래와 꿈을 향한 여정 속에
+        함께할 수 있을까? 🥰
+      </p>
+    </div>
+  </section>
+
+  <div class="footer-note">
+    Made with sincerity and a little bit of code.
+  </div>
+
+  <script>
+    const hearts = document.getElementById('hearts');
+    for (let i = 0; i < 24; i++) {
+      const heart = document.createElement('div');
+      heart.className = 'heart';
+      heart.textContent = ['❤', '💗', '💕', '💖'][Math.floor(Math.random() * 4)];
+      heart.style.left = Math.random() * 100 + 'vw';
+      heart.style.animationDuration = 8 + Math.random() * 10 + 's';
+      heart.style.animationDelay = Math.random() * 8 + 's';
+      heart.style.fontSize = 14 + Math.random() * 18 + 'px';
+      hearts.appendChild(heart);
+    }
+
+    const message = `그래서 이 웹사이트는
+그냥 예쁘게 보이려고 만든 게 아니라,
+내 마음을 조금 더 진심으로 전하고 싶어
+누나 생각하면서 소중하게 만들었어. >_<`;
+
+    const typewriter = document.getElementById('typewriter');
+    let idx = 0;
+
+    function typeText() {
+      if (idx < message.length) {
+        typewriter.textContent += message.charAt(idx);
+        idx++;
+        setTimeout(typeText, 42);
+      }
+    }
+
+    setTimeout(typeText, 800);
+
+    const bgm = document.getElementById('bgm');
+
+    window.addEventListener('load', () => {
+      if (bgm) {
+        bgm.play().catch(() => {
+        });
+      }
+    });
+
+    document.addEventListener('click', () => {
+      if (bgm && bgm.paused) {
+        bgm.play().catch(() => {
+        });
+      }
+    }, { once: true });
+  </script>
+</body>
+</html>
